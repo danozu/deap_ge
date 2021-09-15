@@ -12,10 +12,13 @@ import math
 # Define new functions
 
 def pdiv(a, b):
-    if abs(b) > 1e-3:
-        return np.divide(a,b)
-    else:
-        return 1
+    try:
+        with np.errstate(divide='ignore', invalid='ignore'):
+            return np.where(y == 0, np.ones_like(x), x / y)
+    except ZeroDivisionError:
+        # In this case we are trying to divide two constants, one of which is 0
+        # Return a constant.
+        return 1.0
     
 def protected_div(left, right):
     try:
@@ -60,10 +63,7 @@ def min_(a,b):
     return np.minimum(a, b)
 
 def plog(a):
-    if a > 1e-3:
-        return math.log(a)
-    else:
-        return 0
+    return np.log(1.0 + np.abs(x))
 
 def not_(a):
     return np.logical_not(a)
