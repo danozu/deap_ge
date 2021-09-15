@@ -14,7 +14,7 @@ import math
 def pdiv(a, b):
     try:
         with np.errstate(divide='ignore', invalid='ignore'):
-            return np.where(y == 0, np.ones_like(x), x / y)
+            return np.where(a == 0, np.ones_like(a), a / b)
     except ZeroDivisionError:
         # In this case we are trying to divide two constants, one of which is 0
         # Return a constant.
@@ -63,7 +63,7 @@ def min_(a,b):
     return np.minimum(a, b)
 
 def plog(a):
-    return np.log(1.0 + np.abs(x))
+    return np.log(1.0 + np.abs(a))
 
 def not_(a):
     return np.logical_not(a)
