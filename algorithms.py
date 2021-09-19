@@ -107,6 +107,10 @@ def replacement(new_pop, old_pop, elite_size, pop_size):
     for ind in old_pop[:elite_size]:
         new_pop.insert(0, ind)
 
+    for ind in new_pop:
+        if ind.fitness.values[0] == float('inf'):
+            ind.fitness.values[0] = np.NaN
+
     # Return the top POPULATION_SIZE individuals of the new pop, including
     # elites.
     return new_pop[:pop_size]
