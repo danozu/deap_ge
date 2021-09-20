@@ -107,6 +107,10 @@ def replacement(new_pop, old_pop, elite_size, pop_size):
     for ind in old_pop[:elite_size]:
         new_pop.insert(0, ind)
 
+    for ind in new_pop:
+        if ind.fitness.values[0] == float('inf'):
+            ind.fitness.values[0] = np.NaN
+
     # Return the top POPULATION_SIZE individuals of the new pop, including
     # elites.
     return new_pop[:pop_size]
@@ -201,7 +205,10 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
     record = stats.compile(population) if stats else {}
     logbook.record(gen=0, invalid=invalid, **record, selection_time=selection_time, generation_time=generation_time)
     if verbose:
-        print(logbook.stream)
+        x = logbook.stream.split()
+        print("                     fitness")
+        print(f'{x[0]:3} {x[1]:10} {x[2]:7} {x[3]:7} {x[4]:7} {x[5]:15} {x[6]:16}')
+        print(f'{int(x[7]):3} {int(x[8]):5} {float(x[9]):9.4f} {float(x[10]):7.4f} {float(x[11]):7.4f} {float(x[12]):10.4f} {float(x[13]):16.4f}')
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -231,6 +238,9 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
         # Replace the current population by the offspring
         population[:] = replacement(offspring, population, elite_size=elite_size, pop_size=len(population))
         
+        for ind in population:
+            print(ind.fitness.values[0])
+        
         valid = [ind for ind in population if not math.isnan(ind.fitness.values[0])]
 
         # Update the hall of fame with the generated individuals
@@ -244,6 +254,7 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
         record = stats.compile(population) if stats else {}
         logbook.record(gen=gen, invalid=invalid, **record, selection_time=selection_time, generation_time=generation_time)
         if verbose:
-            print(logbook.stream)
+            x = logbook.stream.split("\t")
+            print(f'{int(x[0]):3} {int(x[1]):5} {float(x[2]):9.4f} {float(x[3]):7.4f} {float(x[4]):7.4f} {float(x[5]):10.4f} {float(x[6]):16.4f}')
 
     return population, logbook
