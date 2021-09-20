@@ -238,6 +238,9 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
         # Replace the current population by the offspring
         population[:] = replacement(offspring, population, elite_size=elite_size, pop_size=len(population))
         
+        for ind in population:
+            print(ind.fitness.values[0])
+        
         valid = [ind for ind in population if not math.isnan(ind.fitness.values[0])]
 
         # Update the hall of fame with the generated individuals
