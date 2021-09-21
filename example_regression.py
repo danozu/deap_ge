@@ -66,6 +66,9 @@ def fitness_eval(individual, points):
     except (FloatingPointError, ZeroDivisionError, OverflowError,
             MemoryError, ValueError):
         fitness = np.NaN
+        
+    if fitness == float("inf"):
+        return np.NaN,
     
     return fitness,
 
@@ -133,3 +136,12 @@ population, logbook = algorithms.ge_eaSimpleWithElitism(population, toolbox, cxp
                                           max_tree_depth=MAX_TREE_DEPTH, max_wraps=MAX_WRAPS,
                                           stats=stats, halloffame=hof, points_train=[X_train, Y_train], 
                                           points_test=[X_test, Y_test], verbose=True)
+
+import textwrap
+best = hof.items[0].phenotype
+print("Best individual: \n","\n".join(textwrap.wrap(best,80)))
+print("\nTraining Fitness: ", hof.items[0].fitness.values[0])
+print("Test Fitness: ", fitness_eval(hof.items[0], [X_test,Y_test])[0])
+print("Depth: ", hof.items[0].depth)
+print("Length of the genome: ", len(hof.items[0].genome))
+print(f'Used portion of the genome: {hof.items[0].used_codons/len(hof.items[0].genome):.2f}')

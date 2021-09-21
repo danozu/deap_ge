@@ -254,7 +254,7 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
         # Replace the current population by the offspring
         population[:] = replacement(offspring, population, elite_size=elite_size, pop_size=len(population))
         
-        fitness_test = toolbox.evaluate(population[0], points_test)[0]
+#        fitness_test = toolbox.evaluate(population[0], points_test)[0]
         #i = 0
         #for ind in population:
         #    i += 1
@@ -265,6 +265,8 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
             halloffame.update(valid)
+        
+        fitness_test = toolbox.evaluate(halloffame.items[0], points_test)[0]
 
         end_gen = time.time()
         generation_time = end_gen-start_gen
