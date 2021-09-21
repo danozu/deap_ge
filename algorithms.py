@@ -186,7 +186,7 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
     """
     
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'invalid'] + (stats.fields if stats else []) + ['fitness_test', 'selection_time', 'generation_time']
+    logbook.header = ['gen', 'invalid'] + (stats.fields if stats else []) + ['fitness_test', 'best_ind_length', 'avg_length', 'max_length', 'selection_time', 'generation_time']
 
     start_gen = time.time()        
     # Evaluate the individuals with an invalid fitness
@@ -213,8 +213,18 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
     
     fitness_test = toolbox.evaluate(population[0], points_test)[0]
     
+    length = [len(ind.genome) for ind in population]
+
+    avg_length = sum(length)/len(length)
+    max_length = max(length)
+    
+    best_ind_length = len(population[0].genome)
+    
     record = stats.compile(population) if stats else {}
-    logbook.record(gen=0, invalid=invalid, **record, fitness_test=fitness_test, selection_time=selection_time, generation_time=generation_time)
+    logbook.record(gen=0, invalid=invalid, **record, fitness_test=fitness_test, 
+                       best_ind_length=best_ind_length, avg_length=avg_length, 
+                       max_length=max_length, selection_time=selection_time, 
+                       generation_time=generation_time)
     if verbose:
         print(logbook.stream)
 #        x = logbook.stream.split()
@@ -266,14 +276,23 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
         if halloffame is not None:
             halloffame.update(valid)
         
+        length = [len(ind.genome) for ind in population]
+        
+        avg_length = sum(length)/len(length)
+        max_length = max(length)
+        
         fitness_test = toolbox.evaluate(halloffame.items[0], points_test)[0]
+        best_ind_length = len(halloffame.items[0].genome)
 
         end_gen = time.time()
         generation_time = end_gen-start_gen
         
         # Append the current generation statistics to the logbook
         record = stats.compile(population) if stats else {}
-        logbook.record(gen=gen, invalid=invalid, **record, fitness_test=fitness_test, selection_time=selection_time, generation_time=generation_time)
+        logbook.record(gen=gen, invalid=invalid, **record, fitness_test=fitness_test, 
+                       best_ind_length=best_ind_length, avg_length=avg_length, 
+                       max_length=max_length, selection_time=selection_time, 
+                       generation_time=generation_time)
         if verbose:
             print(logbook.stream)
 #            x = logbook.stream.split("\t")
