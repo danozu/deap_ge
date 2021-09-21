@@ -8,7 +8,7 @@ Created on Fri Aug 27 15:21:08 2021
 #from ponyge2_adapted_files import Grammar, Individual, initialisation_PI_Grow, crossover_onepoint, mutation_int_flip_per_codon
 from ponyge2_adapted_files import Grammar, ge
 import algorithms
-from functions import pdiv, plog, psqrt
+from functions import div, plog, psqrt, exp
 
 from os import path
 import pandas as pd
@@ -78,7 +78,7 @@ creator.create('Individual', ge.Individual, fitness=creator.FitnessMin)
 
 toolbox.register("populationCreator", ge.initialisation_PI_Grow, creator.Individual) 
 
-toolbox.register("evaluate", fitness_eval, points=[X_train, Y_train])
+toolbox.register("evaluate", fitness_eval)#, points=[X_train, Y_train])
 
 # Tournament selection:
 toolbox.register("select", ge.selTournament, tournsize=7)
@@ -90,8 +90,8 @@ toolbox.register("mate", ge.crossover_onepoint)
 toolbox.register("mutate", ge.mutation_int_flip_per_codon)
     
 
-POPULATION_SIZE = 20 # 2000
-MAX_GENERATIONS = 2
+POPULATION_SIZE = 2000
+MAX_GENERATIONS = 50
 P_CROSSOVER = 0.8
 P_MUTATION = 0.01
 ELITE_SIZE = round(0.01*POPULATION_SIZE)
@@ -120,9 +120,9 @@ import math
 # prepare the statistics object:
 #stats = tools.Statistics(key=lambda ind: ind.fitness.values if math.isnan(ind.fitness.values[0]) else None)#ind.fitness.values != np.inf else None)
 #stats = tools.Statistics(key=lambda ind: ind.fitness.values[0] if not math.isnan(ind.fitness.values[0]) else np.NaN)#ind.fitness.values != np.inf else None)
-stats = tools.Statistics(key=lambda ind: ind.fitness.values if not ind.invalid else (np.NaN,))#ind.fitness.values != np.inf else None)
+stats = tools.Statistics(key=lambda ind: ind.fitness.values)# if not ind.invalid else (np.NaN,))#ind.fitness.values != np.inf else None)
 stats.register("avg", np.nanmean)
-#stats.register("std", np.nanstd)
+stats.register("std", np.nanstd)
 stats.register("min", np.nanmin)
 stats.register("max", np.nanmax)
 
@@ -131,4 +131,5 @@ population, logbook = algorithms.ge_eaSimpleWithElitism(population, toolbox, cxp
                                           ngen=MAX_GENERATIONS, elite_size=ELITE_SIZE,
                                           bnf_grammar=BNF_GRAMMAR, codon_size=CODON_SIZE, 
                                           max_tree_depth=MAX_TREE_DEPTH, max_wraps=MAX_WRAPS,
-                                          stats=stats, halloffame=hof, verbose=True)
+                                          stats=stats, halloffame=hof, points_train=[X_train, Y_train], 
+                                          points_test=[X_test, Y_test], verbose=True)

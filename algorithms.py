@@ -107,9 +107,11 @@ def replacement(new_pop, old_pop, elite_size, pop_size):
     for ind in old_pop[:elite_size]:
         new_pop.insert(0, ind)
 
-    for ind in new_pop:
-        if ind.fitness.values[0] == float('inf'):
-            ind.fitness.values[0] = np.NaN
+#    for ind in old_pop:
+#        if ind.fitness.values[0] == float('inf'):
+#            print(ind.fitness.values[0])
+#            print(ind.phenotype)
+#            ind.fitness.values[0] = np.NaN
 
     # Return the top POPULATION_SIZE individuals of the new pop, including
     # elites.
@@ -117,7 +119,8 @@ def replacement(new_pop, old_pop, elite_size, pop_size):
 
 def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size, 
                 bnf_grammar, codon_size, max_tree_depth, max_wraps,
-                stats=None, halloffame=None, verbose=__debug__):
+                stats=None, halloffame=None, points_train=None, points_test=None, 
+                verbose=__debug__):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of [Back2000]_, and includes Elitism.
 
@@ -183,14 +186,18 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
     """
     
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'invalid'] + (stats.fields if stats else []) + ['selection_time', 'generation_time']
+    logbook.header = ['gen', 'invalid'] + (stats.fields if stats else []) + ['fitness_test', 'selection_time', 'generation_time']
 
     start_gen = time.time()        
     # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
-    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
+#    invalid_ind = [ind for ind in population if not ind.fitness.valid]
+#    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+#    for ind, fit in zip(invalid_ind, fitnesses):
+#        ind.fitness.values = fit
+    for ind in population:
+        if not ind.fitness.valid:
+            invalid_ind = ind
+            ind.fitness.values = toolbox.evaluate(invalid_ind, points_train)
         
     invalid = 0
     for ind in population:
@@ -202,13 +209,18 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
         
     selection_time = 0
     
+    population.sort(key=lambda x: float('inf') if math.isnan(x.fitness.values[0]) else x.fitness.values[0], reverse=False)
+    
+    fitness_test = toolbox.evaluate(population[0], points_test)[0]
+    
     record = stats.compile(population) if stats else {}
-    logbook.record(gen=0, invalid=invalid, **record, selection_time=selection_time, generation_time=generation_time)
+    logbook.record(gen=0, invalid=invalid, **record, fitness_test=fitness_test, selection_time=selection_time, generation_time=generation_time)
     if verbose:
-        x = logbook.stream.split()
-        print("                     fitness")
-        print(f'{x[0]:3} {x[1]:10} {x[2]:7} {x[3]:7} {x[4]:7} {x[5]:15} {x[6]:16}')
-        print(f'{int(x[7]):3} {int(x[8]):5} {float(x[9]):9.4f} {float(x[10]):7.4f} {float(x[11]):7.4f} {float(x[12]):10.4f} {float(x[13]):16.4f}')
+        print(logbook.stream)
+#        x = logbook.stream.split()
+#        print("                     fitness")
+#        print(f'{x[0]:3} {x[1]:10} {x[2]:7} {x[3]:7} {x[4]:7} {x[5]:15} {x[6]:16}')
+#        print(f'{int(x[7]):3} {int(x[8]):5} {float(x[9]):9.4f} {float(x[10]):7.4f} {float(x[11]):7.4f} {float(x[12]):10.4f} {float(x[13]):16.4f}')
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -225,21 +237,28 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
                            bnf_grammar, codon_size, max_tree_depth, max_wraps)
 
         # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-        for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+#        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+#        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+#        for ind, fit in zip(invalid_ind, fitnesses):
+#            ind.fitness.values = fit
+        for ind in offspring:
+            if not ind.fitness.valid:
+                invalid_ind = ind
+                ind.fitness.values = toolbox.evaluate(invalid_ind, points_train)
             
         invalid = 0
-        for ind in population:
+        for ind in offspring:
             if ind.invalid == True:
                 invalid += 1
             
         # Replace the current population by the offspring
         population[:] = replacement(offspring, population, elite_size=elite_size, pop_size=len(population))
         
-        for ind in population:
-            print(ind.fitness.values[0])
+        fitness_test = toolbox.evaluate(population[0], points_test)[0]
+        #i = 0
+        #for ind in population:
+        #    i += 1
+        #    print(i, ind.fitness.values[0])
         
         valid = [ind for ind in population if not math.isnan(ind.fitness.values[0])]
 
@@ -252,9 +271,10 @@ def ge_eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, elite_size,
         
         # Append the current generation statistics to the logbook
         record = stats.compile(population) if stats else {}
-        logbook.record(gen=gen, invalid=invalid, **record, selection_time=selection_time, generation_time=generation_time)
+        logbook.record(gen=gen, invalid=invalid, **record, fitness_test=fitness_test, selection_time=selection_time, generation_time=generation_time)
         if verbose:
-            x = logbook.stream.split("\t")
-            print(f'{int(x[0]):3} {int(x[1]):5} {float(x[2]):9.4f} {float(x[3]):7.4f} {float(x[4]):7.4f} {float(x[5]):10.4f} {float(x[6]):16.4f}')
+            print(logbook.stream)
+#            x = logbook.stream.split("\t")
+#            print(f'{int(x[0]):3} {int(x[1]):5} {float(x[2]):9.4f} {float(x[3]):7.4f} {float(x[4]):7.4f} {float(x[5]):10.4f} {float(x[6]):16.4f}')
 
     return population, logbook

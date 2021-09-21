@@ -11,6 +11,21 @@ import math
 
 # Define new functions
 
+def div(a, b):
+    result = np.where(a == 0, np.ones_like(a), a / b)
+    if result == float("inf"):
+        raise ZeroDivisionError
+    else:
+        return result
+    
+def exp(a):
+    result = np.exp(a)
+    if result == float("inf"):
+        raise OverflowError
+    else:
+        return result
+
+
 def pdiv(a, b):
     try:
         with np.errstate(divide='ignore', invalid='ignore'):
