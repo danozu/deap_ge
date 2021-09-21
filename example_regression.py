@@ -19,7 +19,7 @@ from deap import creator, base, tools
 import warnings
 warnings.filterwarnings("ignore")
 
-problem = 'pagie1'
+problem = 'randomData'
 
 if problem == 'pagie1':
     X_train = np.zeros([2,676], dtype=float)
@@ -44,6 +44,52 @@ if problem == 'pagie1':
 
     GRAMMAR_FILE = 'Pagie1.bnf'
     
+elif problem == 'vladislavleva4':
+  X_train = np.zeros([5,1024], dtype=float)
+  Y_train = np.zeros([1024,], dtype=float)
+
+  data_train = pd.read_table(r"datasets/Vladislavleva4_train.txt")
+  for i in range(5):
+      for j in range(1024):
+            X_train[i,j] = data_train['x'+ str(i)].iloc[j]
+  for i in range(1024):
+      Y_train[i] = data_train['response'].iloc[i]
+
+  X_test = np.zeros([5,5000], dtype=float)
+  Y_test = np.zeros([5000,], dtype=float)
+
+  data_test = pd.read_table(r"datasets/Vladislavleva4_test.txt")
+  for i in range(5):
+      for j in range(5000):
+          X_test[i,j] = data_test['x'+ str(i)].iloc[j]
+  for i in range(5000):
+      Y_test[i] = data_test['response'].iloc[i]
+
+  GRAMMAR_FILE = 'Vladislavleva4.bnf'
+
+elif problem == 'randomData':
+  X_train = np.zeros([5,100], dtype=float)
+  Y_train = np.zeros([100,], dtype=float)
+
+  data_train = pd.read_table(r"datasets/randomData_train.csv")
+  for i in range(5):
+      for j in range(100):
+            X_train[i,j] = data_train['x'+ str(i)].iloc[j]
+  for i in range(100):
+      Y_train[i] = data_train['response'].iloc[i]
+
+  X_test = np.zeros([5,50], dtype=float)
+  Y_test = np.zeros([50,], dtype=float)
+
+  data_test = pd.read_table(r"datasets/randomData_test.csv")
+  for i in range(5):
+      for j in range(50):
+          X_test[i,j] = data_test['x'+ str(i)].iloc[j]
+  for i in range(50):
+      Y_test[i] = data_test['response'].iloc[i]
+
+  GRAMMAR_FILE = 'randomData.bnf'
+  
 BNF_GRAMMAR = Grammar(path.join("grammars", GRAMMAR_FILE))
 
 def fitness_eval(individual, points):
@@ -93,8 +139,8 @@ toolbox.register("mate", ge.crossover_onepoint)
 toolbox.register("mutate", ge.mutation_int_flip_per_codon)
     
 
-POPULATION_SIZE = 2000
-MAX_GENERATIONS = 50
+POPULATION_SIZE = 200
+MAX_GENERATIONS = 500
 P_CROSSOVER = 0.8
 P_MUTATION = 0.01
 ELITE_SIZE = round(0.01*POPULATION_SIZE)
@@ -134,8 +180,9 @@ population, logbook = algorithms.ge_eaSimpleWithElitism(population, toolbox, cxp
                                           ngen=MAX_GENERATIONS, elite_size=ELITE_SIZE,
                                           bnf_grammar=BNF_GRAMMAR, codon_size=CODON_SIZE, 
                                           max_tree_depth=MAX_TREE_DEPTH, max_wraps=MAX_WRAPS,
-                                          stats=stats, halloffame=hof, points_train=[X_train, Y_train], 
-                                          points_test=[X_test, Y_test], verbose=True)
+                                          points_train=[X_train, Y_train], 
+                                          points_test=[X_test, Y_test], 
+                                          stats=stats, halloffame=hof, verbose=True)
 
 import textwrap
 best = hof.items[0].phenotype

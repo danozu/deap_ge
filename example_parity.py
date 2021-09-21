@@ -36,7 +36,7 @@ if problem == 'parity3':
     X = np.zeros([3,8], dtype=bool)
     Y = np.zeros([8,], dtype=bool)
 
-    data = pd.read_table(r"parity3.csv")
+    data = pd.read_table(r"datasets/parity3.csv")
     for i in range(3):
         for j in range(8):
             X[i,j] = data['d'+ str(i)].iloc[j]
@@ -49,7 +49,7 @@ elif problem == 'parity4':
     X = np.zeros([4,16], dtype=bool)
     Y = np.zeros([16,], dtype=bool)
 
-    data = pd.read_table(r"parity4.csv")
+    data = pd.read_table(r"datasets/parity4.csv")
     for i in range(4):
         for j in range(16):
             X[i,j] = data['d'+ str(i)].iloc[j]
@@ -62,7 +62,7 @@ elif problem == 'parity5':
     X = np.zeros([5,32], dtype=bool)
     Y = np.zeros([32,], dtype=bool)
 
-    data = pd.read_table(r"parity5.csv")
+    data = pd.read_table(r"datasets/parity5.csv")
     for i in range(5):
         for j in range(32):
             X[i,j] = data['d'+ str(i)].iloc[j]
@@ -86,8 +86,9 @@ def mae(y, yhat):
 
     return 1 - np.mean(compare)
 
-def fitness_eval(individual):
-    x = X
+def fitness_eval(individual, points):
+    x = points[0]
+    Y = points[1]
     
     if individual.invalid == True:
         return np.NaN,
@@ -152,6 +153,7 @@ def main():
                                               ngen=MAX_GENERATIONS, elite_size=ELITE_SIZE,
                                               bnf_grammar=BNF_GRAMMAR, codon_size=CODON_SIZE, 
                                               max_tree_depth=MAX_TREE_DEPTH, max_wraps=MAX_WRAPS,
+                                              points_train=[X,Y],
                                               stats=stats, halloffame=hof, verbose=True)
 
 if __name__ == "__main__":
