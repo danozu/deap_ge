@@ -15,8 +15,6 @@ import pandas as pd
 import numpy as np
 from deap import creator, base, tools
 
-toolbox = base.Toolbox()
-
 MAX_INIT_TREE_DEPTH = 10
 MIN_INIT_TREE_DEPTH = 1
 MAX_TREE_DEPTH = 17
@@ -33,41 +31,41 @@ HALL_OF_FAME_SIZE = 1
 problem = 'parity3'
 
 if problem == 'parity3':
-    X = np.zeros([3,8], dtype=bool)
-    Y = np.zeros([8,], dtype=bool)
+    X_train = np.zeros([3,8], dtype=bool)
+    Y_train = np.zeros([8,], dtype=bool)
 
     data = pd.read_table(r"datasets/parity3.csv")
     for i in range(3):
         for j in range(8):
-            X[i,j] = data['d'+ str(i)].iloc[j]
+            X_train[i,j] = data['d'+ str(i)].iloc[j]
     for i in range(8):
-        Y[i] = data['output'].iloc[i]
+        Y_train[i] = data['output'].iloc[i]
         
     GRAMMAR_FILE = 'parity3.bnf'
 
 elif problem == 'parity4':
-    X = np.zeros([4,16], dtype=bool)
-    Y = np.zeros([16,], dtype=bool)
+    X_train = np.zeros([4,16], dtype=bool)
+    Y_train = np.zeros([16,], dtype=bool)
 
     data = pd.read_table(r"datasets/parity4.csv")
     for i in range(4):
         for j in range(16):
-            X[i,j] = data['d'+ str(i)].iloc[j]
+            X_train[i,j] = data['d'+ str(i)].iloc[j]
     for i in range(16):
-        Y[i] = data['output'].iloc[i]
+        Y_train[i] = data['output'].iloc[i]
         
     GRAMMAR_FILE = 'parity4.bnf'
 
 elif problem == 'parity5':
-    X = np.zeros([5,32], dtype=bool)
-    Y = np.zeros([32,], dtype=bool)
+    X_train = np.zeros([5,32], dtype=bool)
+    Y_train = np.zeros([32,], dtype=bool)
 
     data = pd.read_table(r"datasets/parity5.csv")
     for i in range(5):
         for j in range(32):
-            X[i,j] = data['d'+ str(i)].iloc[j]
+            X_train[i,j] = data['d'+ str(i)].iloc[j]
     for i in range(32):
-        Y[i] = data['output'].iloc[i]
+        Y_train[i] = data['output'].iloc[i]
         
     GRAMMAR_FILE = 'parity5.bnf'
 
@@ -107,6 +105,7 @@ def fitness_eval(individual, points):
     
     return fitness,
 
+toolbox = base.Toolbox()
 
 # define a single objective, minimising fitness strategy:
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -153,7 +152,7 @@ def main():
                                               ngen=MAX_GENERATIONS, elite_size=ELITE_SIZE,
                                               bnf_grammar=BNF_GRAMMAR, codon_size=CODON_SIZE, 
                                               max_tree_depth=MAX_TREE_DEPTH, max_wraps=MAX_WRAPS,
-                                              points_train=[X,Y],
+                                              points_train=[X_train, Y_train], 
                                               stats=stats, halloffame=hof, verbose=True)
 
 if __name__ == "__main__":
