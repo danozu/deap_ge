@@ -19,7 +19,7 @@ from deap import creator, base, tools
 import warnings
 warnings.filterwarnings("ignore")
 
-problem = 'randomData'
+problem = 'Dow'
 
 if problem == 'pagie1':
     X_train = np.zeros([2,676], dtype=float)
@@ -68,27 +68,50 @@ elif problem == 'vladislavleva4':
   GRAMMAR_FILE = 'Vladislavleva4.bnf'
 
 elif problem == 'randomData':
-  X_train = np.zeros([5,100], dtype=float)
-  Y_train = np.zeros([100,], dtype=float)
+  X_train = np.zeros([5,135], dtype=float)
+  Y_train = np.zeros([135,], dtype=float)
 
-  data_train = pd.read_table(r"datasets/randomData_train.csv")
+  data_train = pd.read_table(r"datasets/randomData_train2.csv")
   for i in range(5):
-      for j in range(100):
+      for j in range(135):
             X_train[i,j] = data_train['x'+ str(i)].iloc[j]
-  for i in range(100):
+  for i in range(135):
       Y_train[i] = data_train['response'].iloc[i]
 
-  X_test = np.zeros([5,50], dtype=float)
-  Y_test = np.zeros([50,], dtype=float)
+  X_test = np.zeros([5,15], dtype=float)
+  Y_test = np.zeros([15,], dtype=float)
 
-  data_test = pd.read_table(r"datasets/randomData_test.csv")
+  data_test = pd.read_table(r"datasets/randomData_test2.csv")
   for i in range(5):
-      for j in range(50):
+      for j in range(15):
           X_test[i,j] = data_test['x'+ str(i)].iloc[j]
-  for i in range(50):
+  for i in range(15):
       Y_test[i] = data_test['response'].iloc[i]
 
   GRAMMAR_FILE = 'randomData.bnf'
+  
+elif problem == 'Dow':
+  X_train = np.zeros([57,747], dtype=float)
+  Y_train = np.zeros([747,], dtype=float)
+
+  data_train = pd.read_table(r"datasets/DowNorm_train.txt")
+  for i in range(56):
+      for j in range(747):
+            X_train[i,j] = data_train['x'+ str(i+1)].iloc[j]
+  for i in range(747):
+      Y_train[i] = data_train['y'].iloc[i]
+
+  X_test = np.zeros([57,319], dtype=float)
+  Y_test = np.zeros([319,], dtype=float)
+
+  data_test = pd.read_table(r"datasets/DowNorm_test.txt")
+  for i in range(56):
+      for j in range(319):
+          X_test[i,j] = data_test['x'+ str(i+1)].iloc[j]
+  for i in range(319):
+      Y_test[i] = data_test['y'].iloc[i]
+
+  GRAMMAR_FILE = 'Dow.bnf'
   
 BNF_GRAMMAR = Grammar(path.join("grammars", GRAMMAR_FILE))
 
@@ -139,7 +162,7 @@ toolbox.register("mate", ge.crossover_onepoint)
 toolbox.register("mutate", ge.mutation_int_flip_per_codon)
     
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 10000
 MAX_GENERATIONS = 500
 P_CROSSOVER = 0.8
 P_MUTATION = 0.01
@@ -192,3 +215,30 @@ print("Test Fitness: ", fitness_eval(hof.items[0], [X_test,Y_test])[0])
 print("Depth: ", hof.items[0].depth)
 print("Length of the genome: ", len(hof.items[0].genome))
 print(f'Used portion of the genome: {hof.items[0].used_codons/len(hof.items[0].genome):.2f}')
+
+max_fitness_values, mean_fitness_values = logbook.select("max", "avg")
+min_fitness_values, std_fitness_values = logbook.select("min", "std")
+fitness_test = logbook.select("fitness_test")
+best_ind_length = logbook.select("best_ind_length")
+avg_length = logbook.select("avg_length")
+max_length = logbook.select("max_length")
+selection_time = logbook.select("selection_time")
+generation_time = logbook.select("generation_time")
+gen, invalid = logbook.select("gen", "invalid")
+
+plt.plot(gen, min_fitness_values, color='red', label="Training fitness")
+plt.plot(gen, fitness_test, color='blue', label="Test fitness")
+plt.legend(fontsize=12)
+plt.xlabel('Generations', fontsize=14)
+plt.ylabel('Best Fitness', fontsize=14)
+plt.title('Best Fitness over Generations', fontsize=16)
+plt.show()
+
+plt.plot(gen, max_length, color='red', label="Maximum")
+plt.plot(gen, avg_length, color='blue', label="Average")
+plt.plot(gen, best_ind_length, color='green', label="Best individual")
+plt.legend(fontsize=12)
+plt.xlabel('Generations', fontsize=14)
+plt.ylabel('Genome Length', fontsize=14)
+plt.title('Genome Length over Generations', fontsize=16)
+plt.show()
